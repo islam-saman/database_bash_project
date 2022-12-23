@@ -41,5 +41,33 @@ echo $choice
         ls -F | grep -v "/$"
 
         ;;
+
+        DropTable ) 
+        while true
+        do
+            read -p "Enter Name of a Table to remove : " name
+            if [[ ${name} =~ $regex ]]
+                then
+                    if [ -f $name ]
+                        then
+                            rm $name
+                            echo "Your Table has been removed"
+                            break
+                    else 
+                        echo "There is no Table with this name"
+                        read -p "Do you want to search again(yes or no)" user_input
+
+                        if [[ $user_input == "yes" ]]
+                            then 
+                                continue
+                        else
+                            break
+                        fi 
+                    fi             	    
+             else
+	            echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
+            fi
+        done            
+        ;;        
         esac
 done
