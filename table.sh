@@ -36,5 +36,10 @@ echo $choice
             fi
         done
         ;;
+
+        ListTables ) 
+        ls -F | grep -v "/$"
+
+        ;;
         esac
 done
