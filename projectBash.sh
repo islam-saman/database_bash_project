@@ -27,19 +27,29 @@ echo $choice
 
     case $choice in 
         CreateDatabase )
+        while true
+        do
             read -p "Enter Name of your Database : " name
             if [[ ${name} =~ $regex ]]
                 then
                     if [ -e $name ] ;then
-                        echo "Database Already Exits : "
+                        echo "Database Already Exits "
+                        read -p "Do you want to Enter the name Again(yes or no)" user_input
+
+                        if [[ $user_input == "yes" ]]
+                            then 
+                                continue
+                        else
+                            break
+                        fi
                     else 
                         mkdir $name
+                        break
                     fi             	    
              else
 	            echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
             fi
-        ;; 
-
+        done 
      esac
 done
 
