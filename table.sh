@@ -29,6 +29,36 @@ echo $choice
                         fi
                     else 
                         touch $name
+                        read -p "Enter Number of Fields : " num_Field
+                        echo
+                        echo "The first colum is PRIMAY KEY by defualt"
+
+                        declare -i num_Fields=$num_Field
+                        declare -i count=1
+                        colum=""
+                        type=""
+
+                        while (( $count <= $num_Fields ))
+                        do
+                            if [[ $count == $num_Fields ]]
+                                then
+                                    read -p "Enter the $count Field : " user_content
+                                    colum+=$user_content
+
+                                    read -p "Enter the type of field : " content_type
+                                    type+=$content_type
+                            else
+                                    read -p "Enter the $count Field : " user_content
+                                    colum+=$user_content":"
+
+                                    read -p "Enter the type of field : " content_type
+                                    type+=$content_type":"                                  
+                            fi
+                            let count=$count+1
+                        done
+                        echo $colum >> $name
+                        echo $type >> $name
+
                         break
                     fi             	    
              else
