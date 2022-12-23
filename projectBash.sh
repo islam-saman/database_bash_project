@@ -49,11 +49,45 @@ echo $choice
              else
 	            echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
             fi
-        done 
+        done
         ;;
 
         ListDatabases ) 
         ls -F | grep "/" | cut -d/ -f1
+
+        ;;
+
+        ConnectToDatabases ) 
+            echo "Will work on it latter"
+        ;;
+
+        DropDatabase ) 
+        while true
+        do
+            read -p "Enter Name of a Database to remove : " name
+            if [[ ${name} =~ $regex ]]
+                then
+                    if [ -d $name ]
+                        then
+                            rm -r $name
+                            echo "Your database has been removed"
+                            break
+                    else 
+                        echo "There is no databae with this name"
+                        read -p "Do you want to search again(yes or no)" user_input
+
+                        if [[ $user_input == "yes" ]]
+                            then 
+                                continue
+                        else
+                            break
+                        fi 
+                    fi             	    
+             else
+	            echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
+            fi
+        done            
+        ;;
+
      esac
 done
-
