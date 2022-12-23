@@ -50,6 +50,10 @@ echo $choice
 	            echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
             fi
         done 
+        ;;
+
+        ListDatabases ) 
+        ls -F | grep "/" | cut -d/ -f1
      esac
 done
 
