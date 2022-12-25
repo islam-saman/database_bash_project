@@ -64,25 +64,34 @@ do
             fi
             
          
-        
+        ;;
+
+        COLUMN )
+            read -p "Enter the field you want to select it  : " field
+            declare -i checker=0
+
+            for (( i=0; i<3; i++ ))
+            do
+                if [[ $field == ${array[$i]} ]]
+                    then
+                        declare -i f=$i+1 
+                        cut -d: -f$f t8 | sed -n '1!p' | sed -n '1!p'
+                        checker=1
+                        break
+                fi
+            done
+
+            if [[ $checker == 0 ]]
+                then
+                    echo "We didn't found your column, You must choose from this list"
+                    echo $x
+            fi
+
+        ;;
         * )
             echo "Please select one of the choice: "
     esac
 done
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
