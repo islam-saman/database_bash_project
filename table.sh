@@ -121,7 +121,6 @@ echo $choice
                                     check_unique=""
 
                                 declare -i insert_num_fields=$(sed -n "1p" $name | grep -o ":" | wc -l)+1
-                                    echo $insert_num_fields
 
                                     while true
                                     do
@@ -142,20 +141,40 @@ echo $choice
                                                     fi
                                             fi
 
-                                            if [[ $colum_type == "int" ]]
+                                            if [[ $count == $insert_num_fields ]]
                                                 then
-                                                    if [[ ${user_input} =~ $intReg ]]
+                                                 if [[ $colum_type == "int" ]]
+                                                    then
+                                                        if [[ ${user_input} =~ $intReg ]]
+                                                            then
+                                                                line_insert+=$user_input
+                                                        else
+                                                            continue
+                                                        fi
+                                                else
+                                                    if [[ ${user_input} =~ $strReg ]]
+                                                        then
+                                                            line_insert+=$user_input
+                                                    else
+                                                        continue
+                                                    fi
+                                                fi
+                                            else
+                                                if [[ $colum_type == "int" ]]
+                                                    then
+                                                        if [[ ${user_input} =~ $intReg ]]
+                                                            then
+                                                                line_insert+=$user_input":"
+                                                        else
+                                                            continue
+                                                        fi
+                                                else
+                                                    if [[ ${user_input} =~ $strReg ]]
                                                         then
                                                             line_insert+=$user_input":"
                                                     else
                                                         continue
                                                     fi
-                                            else
-                                                if [[ ${user_input} =~ $strReg ]]
-                                                    then
-                                                        line_insert+=$user_input":"
-                                                else
-                                                    continue
                                                 fi
                                             fi
 
@@ -195,51 +214,132 @@ echo $choice
             fi
         done
         ;;
+        
+    SelectFromTable )
+ 
+            read -p "Enter Name of the table to select into : " name
+
+            if [[ ${name} =~ $regex ]]
+                then
+                    if [ -e $name ]
+                        then
+                            select choice in ALL BYCOLUMN COLUMN
+                            do
+                                x=$(sed -n "1p" $name | sed 's/:/ /g')
+                                numOfFiled=$(sed -n "1p" $name | sed 's/:/ /g' | wc -w)
+
+                                declare -a array=($x)
+
+                                echo $choice
+                                case $choice in
+                                    ALL )
+                                        cat $name | sed -n '1!p' | sed -n '1!p'
+                                    ;;
+
+                                    BYCOLUMN )
+                                        read -p "Enter the column you want to select it  : " column
+
+                                        declare -i checker=0
+                                        declare -i checker1=0
+
+                                        for (( i=0; i<$numOfFiled; i++ ))  
+                                        do
+                                            if [[ $column == ${array[$i]} ]]
+                                                then
+                                                    read -p "Enter the value your search for  : " user_value
+                                                    declare -i columNum=$i+1
+
+                                                    column_data=$(cut -d: -f$columNum $name) 
+                                                    declare -a column_dataArray=($column_data)
+                                                    declare -i numOfColumnData=$(cut -d: -f$columNum $name | wc -w)
+                                                    declare -i column_index
+
+                                                    for(( index=2; index < numOfColumnData; index++ ))
+                                                    do
+                                                        if [[ $user_value == ${column_dataArray[$index]} ]]
+                                                            then
+                                                                checker=1
+                                                                column_index=$index+1
+                                                                break
+                                                        fi
+                                                    done
+                                                    checker1=1
+                                            fi
+
+                                        done
+
+                                        if  [[ $checker == 1  && $checker1 == 1 ]]
+                                            then 
+                                                sed -n "$column_index p" $name ;
+                                        fi
+
+                                        if [[ $checker1 == 1 &&  $checker == 0 ]]
+                                            then
+                                                echo "Value not found, please select again"
+                                        fi
+
+                                        if [[ $checker1 == 0 ]]
+                                            then
+                                                echo "We didn't found your column, You must choose from this list"
+                                                echo $x
+                                        fi
+                                        
+                                    
+                                    ;;
+
+                                    COLUMN )
+                                        read -p "Enter the field you want to select it  : " field
+                                        declare -i checker=0
+
+                                        for (( i=0; i<$numOfFiled; i++ ))
+                                        do
+                                            if [[ $field == ${array[$i]} ]]
+                                                then
+                                                    declare -i f=$i+1 
+                                                    cut -d: -f$f $name | sed -n '1!p' | sed -n '1!p'
+                                                    checker=1
+                                                    break
+                                            fi
+                                        done
+
+                                        if [[ $checker == 0 ]]
+                                            then
+                                                echo "We didn't found your column, You must choose from this list"
+                                                echo $x
+                                        fi
+
+                                    ;;    
+
+                                    * )
+                                        echo "Please select one of the choice: "
+                                esac
+                            done 
+                    else
+                        echo "Table is not found"
+                    fi
+
+            else
+                echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
+            fi                                                      
+        ;;
+        DeleteFromTable )
+ 
+            read -p "Enter Name of the table to delete it : " name
+
+            if [[ ${name} =~ $regex ]]
+                then
+                    if [ -e $name ]
+                        then
+                            . ./delete.sh
+                    else
+                        echo "We dind't find the table"
+                    fi
+
+            else
+        
+                echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
+            fi           
+        ;;
 
         esac
 done
-
-
-
-#         echo "Table Already Exits "
-#         read -p "Do you want to Enter insert something else (yes or no)" user_input
-#         if [[ $user_input == "yes" ]]
-#             then
-#                 continue
-#         else
-#             break
-#         fi
-# else
-#     touch $name
-#     read -p "Enter Number of Fields : " num_Field
-#     echo
-#     echo "The first colum is PRIMAY KEY by defualt"
-
-#     declare -i num_Fields=$num_Field
-#     declare -i count=1
-#     colum=""
-#     type=""
-
-#     while (( $count <= $num_Fields ))
-#     do
-#         if [[ $count == $num_Fields ]]
-#             then
-#                 read -p "Enter the $count Field : " user_content
-#                 colum+=$user_content
-
-#                 read -p "Enter the type of field : " content_type
-#                 type+=$content_type
-#         else
-#                 read -p "Enter the $count Field : " user_content
-#                 colum+=$user_content":"
-
-#                 read -p "Enter the type of field : " content_type
-#                 type+=$content_type":"
-#         fi
-#         let count=$count+1
-#     done
-#     echo $colum >> $name
-#     echo $type >> $name
-
-#     break
-# fi
