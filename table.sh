@@ -9,14 +9,23 @@ intReg='^[0-9]+$'
 strReg='^[A-Za-z]+$'
 declare -i num_Fields
 
-select choice in CreateTable ListTables DropTable InsertIntoTable SelectFromTable DeleteFromTable UpdateTable
-do
+function advancedMenue() {
 
-echo $choice
+ADVSEL=$(whiptail --title "menu" --fb --menu "select option" 15 60 4 \
+"CreateTable"                              "options" \
+"ListTables"                               "options" \
+"DropTable"                                "options" \
+"InsertIntoTable"                          "options" \
+"SelectFromTable"                          "options" \
+"DeleteFromTable"                          "options" \
+"UpdateTable"                              "options" \
+"BackToMainMenue"                          "options"   3>&1 1>&2 2>&3)
 
-    case $choice in
-        CreateTable )
-        while true
+ case $ADVSEL in
+
+
+  CreateTable)
+         while true
         do
             read -p "Enter Name of your Table : " name
             if [[ ${name} =~ $regex ]]
@@ -35,6 +44,10 @@ echo $choice
                     else
                         touch $name
                         read -p "Enter Number of Fields : " num_Field
+                       if [[ $num_Field == 0 ]]
+                            then
+                                rm $name
+                        fi
                         echo
                         echo "The first colum is PRIMAY KEY by defualt"
 
@@ -51,13 +64,28 @@ echo $choice
                                     colum+=$user_content
 
                                     read -p "Enter the type of field : " content_type
-                                    type+=$content_type
+                                    if [[ $content_type == "string" || $content_type == "int" ]]
+                                        then
+                                            type+=$content_type
+                                        else
+                                           echo "Only int and string are vaild type"
+                                           read -p "Enter the type of field : " content_type 
+                                           type+=$content_type
+                                    fi
+                                    
                             else
                                     read -p "Enter the $count Field : " user_content
                                     colum+=$user_content":"
 
                                     read -p "Enter the type of field : " content_type
-                                    type+=$content_type":"
+                                    if [[ $content_type == "string" || $content_type == "int" ]]
+                                        then
+                                            type+=$content_type":"
+                                        else
+                                           echo "Only int and string are vaild type"
+                                           read -p "Enter the type of field : " content_type
+                                           type+=$content_type":"
+                                    fi
                             fi
                             let count=$count+1
                         done
@@ -70,14 +98,17 @@ echo $choice
 	            echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
             fi
         done
-        ;;
 
-        ListTables )
-        ls -F | grep -v "/$"
+    advancedMenue
+      ;;
+  
+  ListTables)
+    ls -F | grep -v "/$"
+    sleep 3
+    advancedMenue      
+      ;;
 
-        ;;
-
-        DropTable )
+  DropTable)
         while true
         do
             read -p "Enter Name of a Table to remove : " name
@@ -103,9 +134,10 @@ echo $choice
 	            echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
             fi
         done
-        ;;
+    advancedMenue
+      ;;
 
-        InsertIntoTable )
+  InsertIntoTable)
         declare -i check_state=0
         while true
         do
@@ -213,133 +245,28 @@ echo $choice
                 break
             fi
         done
-        ;;
-        
-    SelectFromTable )
- 
-            read -p "Enter Name of the table to select into : " name
+    advancedMenue
+      ;;
 
-            if [[ ${name} =~ $regex ]]
-                then
-                    if [ -e $name ]
-                        then
-                            select choice in ALL BYCOLUMN COLUMN
-                            do
-                                x=$(sed -n "1p" $name | sed 's/:/ /g')
-                                numOfFiled=$(sed -n "1p" $name | sed 's/:/ /g' | wc -w)
+  SelectFromTable)
+    . ../../selectTable.sh
+    advancedMenue       
+      ;;
 
-                                declare -a array=($x)
+  DeleteFromTable)
+    . ../../delete.sh
+    advancedMenue
+      ;;
 
-                                echo $choice
-                                case $choice in
-                                    ALL )
-                                        cat $name | sed -n '1!p' | sed -n '1!p'
-                                    ;;
+  UpdateTable)
+    . ../../updata.sh
+    advancedMenue
+      ;;
+  BackToMainMenue)
+    cd ../../
+    ./projectBash.sh
+    
+  esac
 
-                                    BYCOLUMN )
-                                        read -p "Enter the column you want to select it  : " column
-
-                                        declare -i checker=0
-                                        declare -i checker1=0
-
-                                        for (( i=0; i<$numOfFiled; i++ ))  
-                                        do
-                                            if [[ $column == ${array[$i]} ]]
-                                                then
-                                                    read -p "Enter the value your search for  : " user_value
-                                                    declare -i columNum=$i+1
-
-                                                    column_data=$(cut -d: -f$columNum $name) 
-                                                    declare -a column_dataArray=($column_data)
-                                                    declare -i numOfColumnData=$(cut -d: -f$columNum $name | wc -w)
-                                                    declare -i column_index
-
-                                                    for(( index=2; index < numOfColumnData; index++ ))
-                                                    do
-                                                        if [[ $user_value == ${column_dataArray[$index]} ]]
-                                                            then
-                                                                checker=1
-                                                                column_index=$index+1
-                                                                break
-                                                        fi
-                                                    done
-                                                    checker1=1
-                                            fi
-
-                                        done
-
-                                        if  [[ $checker == 1  && $checker1 == 1 ]]
-                                            then 
-                                                sed -n "$column_index p" $name ;
-                                        fi
-
-                                        if [[ $checker1 == 1 &&  $checker == 0 ]]
-                                            then
-                                                echo "Value not found, please select again"
-                                        fi
-
-                                        if [[ $checker1 == 0 ]]
-                                            then
-                                                echo "We didn't found your column, You must choose from this list"
-                                                echo $x
-                                        fi
-                                        
-                                    
-                                    ;;
-
-                                    COLUMN )
-                                        read -p "Enter the field you want to select it  : " field
-                                        declare -i checker=0
-
-                                        for (( i=0; i<$numOfFiled; i++ ))
-                                        do
-                                            if [[ $field == ${array[$i]} ]]
-                                                then
-                                                    declare -i f=$i+1 
-                                                    cut -d: -f$f $name | sed -n '1!p' | sed -n '1!p'
-                                                    checker=1
-                                                    break
-                                            fi
-                                        done
-
-                                        if [[ $checker == 0 ]]
-                                            then
-                                                echo "We didn't found your column, You must choose from this list"
-                                                echo $x
-                                        fi
-
-                                    ;;    
-
-                                    * )
-                                        echo "Please select one of the choice: "
-                                esac
-                            done 
-                    else
-                        echo "Table is not found"
-                    fi
-
-            else
-                echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
-            fi                                                      
-        ;;
-        DeleteFromTable )
- 
-            read -p "Enter Name of the table to delete it : " name
-
-            if [[ ${name} =~ $regex ]]
-                then
-                    if [ -e $name ]
-                        then
-                            . ./delete.sh
-                    else
-                        echo "We dind't find the table"
-                    fi
-
-            else
-        
-                echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
-            fi           
-        ;;
-
-        esac
-done
+}
+advancedMenue

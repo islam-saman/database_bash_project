@@ -1,3 +1,4 @@
+#!/bin/bash 
 #!/usr/bin/bash 
 export LC_COLLATE=C
 shopt -s extglob
@@ -20,14 +21,19 @@ else
      echo; echo
 fi
 
-select choice in CreateDatabase ListDatabases ConnectToDatabases DropDatabase
-do 
+function advancedMenue() {
 
-echo $choice
+ADVSEL=$(whiptail --title "menu" --fb --menu "select option" 15 60 4 \
+"CreateDatabase"                            "options" \
+"ListDatabases"                              "options" \
+"ConnectToDatabases"                         "options"  \
+"DropDatabase"                               "options"     3>&1 1>&2 2>&3)
 
-    case $choice in 
-        CreateDatabase )
-        while true
+ case $ADVSEL in
+
+
+  CreateDatabase ) 
+       while true
         do
             read -p "Enter Name of your Database : " name
             if [[ ${name} =~ $regex ]]
@@ -50,14 +56,16 @@ echo $choice
 	            echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
             fi
         done
-        ;;
+        advancedMenue
+    ;;
+  
+  ListDatabases )
+        ls -F | grep "/" | cut -d/ -f1  
+        sleep 3
+        advancedMenue   
+    ;;
 
-        ListDatabases ) 
-        ls -F | grep "/" | cut -d/ -f1
-
-        ;;
-
-        ConnectToDatabases ) 
+  ConnectToDatabases )
         while true
         do
             read -p "Enter a name of  Database to connect : " name
@@ -83,10 +91,10 @@ echo $choice
              else
 	            echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
             fi
-        done            
-        ;;
-
-        DropDatabase ) 
+        done      
+        advancedMenue      
+    ;;
+   DropDatabase )
         while true
         do
             read -p "Enter Name of a Database to remove : " name
@@ -111,8 +119,12 @@ echo $choice
              else
 	            echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
             fi
-        done            
-        ;;
+        done   
+        advancedMenue         
+    ;;
+     * )
+        echo "Please select one of the choice: "
+  esac
 
-     esac
-done
+}
+advancedMenue
