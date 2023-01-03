@@ -24,10 +24,10 @@ fi
 function advancedMenue() {
 
 ADVSEL=$(whiptail --title "menu" --fb --menu "select option" 15 60 4 \
-"CreateDatabase"                            "options" \
-"ListDatabases"                              "options" \
-"ConnectToDatabases"                         "options"  \
-"DropDatabase"                               "options"     3>&1 1>&2 2>&3)
+"CreateDatabase" "" \
+"ListDatabases" "" \
+"ConnectToDatabases" ""  \
+"DropDatabase" ""     3>&1 1>&2 2>&3)
 
  case $ADVSEL in
 
@@ -54,6 +54,7 @@ ADVSEL=$(whiptail --title "menu" --fb --menu "select option" 15 60 4 \
                     fi             	    
              else
 	            echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
+                sleep 3
             fi
         done
         advancedMenue
@@ -90,6 +91,7 @@ ADVSEL=$(whiptail --title "menu" --fb --menu "select option" 15 60 4 \
                     fi             	    
              else
 	            echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
+                sleep 3
             fi
         done      
         advancedMenue      
@@ -104,6 +106,7 @@ ADVSEL=$(whiptail --title "menu" --fb --menu "select option" 15 60 4 \
                         then
                             rm -r $name
                             echo "Your database has been removed"
+                            sleep 3
                             break
                     else 
                         echo "There is no databae with this name"
@@ -118,12 +121,15 @@ ADVSEL=$(whiptail --title "menu" --fb --menu "select option" 15 60 4 \
                     fi             	    
              else
 	            echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
+                sleep 3
             fi
         done   
         advancedMenue         
     ;;
      * )
-        echo "Please select one of the choice: "
+        echo "Please select something"
+        sleep 3
+        exit
   esac
 
 }

@@ -24,17 +24,20 @@ if [[ ${name} =~ $regex ]]
                 function advancedMenue() {
 
                 ADVSEL=$(whiptail --title "menu" --fb --menu "select option" 15 60 4 \
-                "ALL"                                    "options" \
-                "BYCOLUMN"                               "options" \
-                "COLUMN"                                 "options" \
-                "BackToMainMenue"                         "options"   3>&1 1>&2 2>&3)
+                "ALL"  "" \
+                "BYCOLUMN"   "" \
+                "COLUMN" "" \
+                "BackToMainMenue" ""   3>&1 1>&2 2>&3)
 
                 case $ADVSEL in
 
 
                 ALL)
+                    echo
                     cat $name | sed -n '1!p' | sed -n '1!p'
+                    echo
                     sleep 5
+                    echo
                     advancedMenue
                     ;;
                 
@@ -54,36 +57,44 @@ if [[ ${name} =~ $regex ]]
                                 column_data=$(cut -d: -f$columNum $name) 
                                 declare -a column_dataArray=($column_data)
                                 declare -i numOfColumnData=$(cut -d: -f$columNum $name | wc -w)
-                                declare -i column_index
+                                declare -a column_index
+                                declare -i counter=0
 
                                 for(( index=2; index < numOfColumnData; index++ ))
                                 do
                                     if [[ $user_value == ${column_dataArray[$index]} ]]
                                         then
                                             checker=1
-                                            column_index=$index+1
-                                            break
+                                            let count=$index+1
+                                            column_index[$counter]=$count
+                                            counter=$counter+1
                                     fi
                                 done
                                 checker1=1
                         fi
 
                     done
-
                     if  [[ $checker == 1  && $checker1 == 1 ]]
-                        then 
-                            sed -n "$column_index p" $name ;
+                        then
+                         for(( index=0; index < counter; index++ ))
+                         do
+                            sed -n "${column_index[$index]} p" $name ;
+                         done
+                         echo
+                         sleep 3
                     fi
 
                     if [[ $checker1 == 1 &&  $checker == 0 ]]
                         then
                             echo "Value not found, please select again"
+                            sleep 3
                     fi
 
                     if [[ $checker1 == 0 ]]
                         then
                             echo "We didn't found your column, You must choose from this list"
                             echo $x
+                            sleep 3
                     fi
                             
                     advancedMenue      
@@ -99,6 +110,8 @@ if [[ ${name} =~ $regex ]]
                             then
                                 declare -i f=$i+1 
                                 cut -d: -f$f $name | sed -n '1!p' | sed -n '1!p'
+                                echo
+                                sleep 3
                                 checker=1
                                 break
                         fi
@@ -108,6 +121,7 @@ if [[ ${name} =~ $regex ]]
                         then
                             echo "We didn't found your column, You must choose from this list"
                             echo $x
+                            sleep 3
                     fi
                     advancedMenue
                     ;;
@@ -120,9 +134,11 @@ if [[ ${name} =~ $regex ]]
                 advancedMenue
         else
             echo "Table is not found"
+            sleep 3
         fi
 
 else
     echo "The name is wrong, the name don't have to start with numbers or special character and not contain spaces or special character"
+    sleep 3
 fi 
         
